@@ -384,10 +384,12 @@
     </div>
 
     <!-- Reproductor de YouTube pequeño -->
+    <audio id="bgMusic" loop>
+    	<source src="closing_time.mp3" type="audio/mpeg">
+    </audio>
     <div class="music-player" id="musicPlayer" style="display: none;">
-        <span class="music-label">🎵 <strong>Closing Time</strong> - Semisonic</span>
-        <div class="yt-container" id="ytContainer"></div>
-        <button class="mute-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
+    	<span class="music-label">🎵 <strong>Closing Time</strong> - Semisonic</span>
+    	<button class="mute-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
     </div>
 
     <div class="nav-hint" id="navHint" style="display: none;">Desliza o toca los lados para navegar</div>
