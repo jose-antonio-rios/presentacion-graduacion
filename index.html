@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Través del Tiempo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: #1a1a2e;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            height: 100dvh;
+        }
+
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 1.2s ease-in-out;
+            pointer-events: none;
+            padding: 15px;
+            padding-bottom: 80px;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .slide-image {
+            max-width: 90%;
+            max-height: 55vh;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            object-fit: contain;
+        }
+
+        .slide-caption {
+            margin-top: 15px;
+            font-size: 1rem;
+            font-style: italic;
+            color: #e0d5c1;
+            text-align: center;
+            max-width: 90%;
+            line-height: 1.6;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s ease 0.5s;
+        }
+
+        .slide.active .slide-caption {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide-title {
+            font-size: 1.4rem;
+            margin-bottom: 8px;
+            color: #f0e6d3;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.8s ease 0.3s;
+            text-align: center;
+        }
+
+        .slide.active .slide-title {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide.final .slide-title {
+            font-size: 1.6rem;
+            color: #c9a96e;
+            text-shadow: 0 0 20px rgba(201,169,110,0.3);
+        }
+
+        .slide.final .slide-caption {
+            font-size: 1.05rem;
+            color: #f0e6d3;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0; left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #c9a96e, #f0e6d3);
+            transition: width 0.8s ease;
+            z-index: 100;
+        }
+
+        .intro-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #1a1a2e;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            transition: opacity 1s ease;
+            padding: 20px;
+        }
+
+        .intro-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .intro-title {
+            font-size: 2rem;
+            color: #f0e6d3;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .intro-subtitle {
+            font-size: 1rem;
+            color: #c9a96e;
+            font-style: italic;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .intro-song {
+            font-size: 0.9rem;
+            color: #8a8a9a;
+            margin-bottom: 25px;
+            font-style: italic;
+            text-align: center;
+        }
+
+        .start-btn {
+            background: linear-gradient(135deg, #c9a96e, #f0e6d3);
+            color: #1a1a2e;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            font-family: 'Georgia', serif;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 1px;
+        }
+
+        .start-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(201,169,110,0.4);
+        }
+
+        .decorative-line {
+            width: 80px;
+            height: 2px;
+            background: #c9a96e;
+            margin: 15px auto;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide.active .slide-image {
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .confetti-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 50;
+            overflow: hidden;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            top: -10px;
+            animation: confettiFall linear forwards;
+        }
+
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+
+        /* Reproductor de YouTube pequeño y estilizado */
+        .music-player {
+            position: fixed;
+            bottom: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 150;
+            background: rgba(0,0,0,0.7);
+            border-radius: 12px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .music-label {
+            color: #e0d5c1;
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        .music-label strong {
+            color: #c9a96e;
+        }
+
+        .yt-container {
+            width: 120px;
+            height: 30px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .yt-container iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .mute-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #e0d5c1;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .mute-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .mute-btn.muted {
+            opacity: 0.5;
+        }
+
+        /* Navegación táctil para móvil */
+        .nav-hint {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.4);
+            font-size: 0.8rem;
+            z-index: 100;
+            text-align: center;
+        }
+
+        /* Responsive para móvil */
+        @media (max-width: 600px) {
+            .intro-title { font-size: 1.5rem; }
+            .intro-subtitle { font-size: 0.9rem; }
+            .slide-title { font-size: 1.2rem; }
+            .slide-caption { font-size: 0.9rem; }
+            .slide.final .slide-title { font-size: 1.3rem; }
+            .slide.final .slide-caption { font-size: 0.95rem; }
+            .slide-image { max-height: 50vh; }
+            .music-player { 
+                flex-direction: column; 
+                gap: 5px;
+                padding: 6px 10px;
+            }
+            .yt-container { width: 100px; height: 25px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
+    <div class="confetti-container" id="confettiContainer"></div>
+
+    <div class="intro-overlay" id="introOverlay">
+        <div class="intro-title">A Través del Tiempo</div>
+        <div class="decorative-line"></div>
+        <div class="intro-subtitle">Una historia de crecimiento, esfuerzo y logros</div>
+        <div class="intro-song">🎵 Semisonic - Closing Time</div>
+        <button class="start-btn" onclick="startPresentation()">▶ Comenzar</button>
+    </div>
+
+    <div class="presentation" id="presentation">
+
+        <div class="slide active" data-index="0">
+            <div class="slide-title">Los Primeros Pasos</div>
+            <div class="decorative-line"></div>
+            <img class="slide-image" src="https://i.ibb.co/7QqYxKz/slide1.jpg" alt="Graduación Kinder"
+                 onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%232a2a3e%22 width=%22400%22 height=%22300%22/><text x=%22200%22 y=%22150%22 text-anchor=%22middle%22 fill=%22%23f0e6d3%22 font-size=%2220%22>🎓 Slide 1</text></svg>'">
+            <div class="slide-caption">"El comienzo de un camino lleno de aprendizajes. Con birrete y toga, los primeros logros que marcan el inicio de una gran aventura."</div>
+        </div>
+
+        <div class="slide" data-index="1">
+            <div class="slide-title">Momentos de Cariño</div>
+            <div class="decorative-line"></div>
+            <img class="slide-image" src="https://i.ibb.co/8XqYxKz/slide2.jpg" alt="Abrazo"
+                 onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%232a2a3e%22 width=%22400%22 height=%22300%22/><text x=%22200%22 y=%22150%22 text-anchor=%22middle%22 fill=%22%23f0e6d3%22 font-size=%2220%22>🤗 Slide 2</text></svg>'">
+            <div class="slide-caption">"Los abrazos que celebran cada logro. El apoyo de quienes nos quieren hace que cada momento sea más especial."</div>
+        </div>
+
+        <div class="slide" data-index="2">
+            <div class="slide-title">Creciendo con Orgullo</div>
+            <div class="decorative-line"></div>
+            <img class="slide-image" src="https://i.ibb.co/9XqYxKz/slide3.jpg" alt="Ceremonia Escolar"
+                 onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%232a2a3e%22 width=%22400%22 height=%22300%22/><text x=%22200%22 y=%22150%22 text-anchor=%22middle%22 fill=%22%23f0e6d3%22 font-size=%2220%22>🏅 Slide 3</text></svg>'">
+            <div class="slide-caption">"Con la banda azul y el emblema que representa el esfuerzo. Cada ceremonia es un nuevo capítulo en la historia."</div>
+        </div>
+
+        <div class="slide" data-index="3">
+            <div class="slide-title">Reconocimiento y Esfuerzo</div>
+            <div class="decorative-line"></div>
+            <img class="slide-image" src="https://i.ibb.co/AXqYxKz/slide4.jpg" alt="Reconocimiento"
+                 onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%232a2a3e%22 width=%22400%22 height=%22300%22/><text x=%22200%22 y=%22150%22 text-anchor=%22middle%22 fill=%22%23f0e6d3%22 font-size=%2220%22>🦅 Slide 4</text></svg>'">
+            <div class="slide-caption">"El emblema del águila simboliza la fuerza y el orgullo de pertenecer. Momentos que quedan grabados para siempre."</div>
+        </div>
+
+        <div class="slide" data-index="4">
+            <div class="slide-title">Nuevos Horizontes</div>
+            <div class="decorative-line"></div>
+            <img class="slide-image" src="https://i.ibb.co/BXqYxKz/slide5.jpg" alt="Baile de Graduación"
+                 onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%232a2a3e%22 width=%22400%22 height=%22300%22/><text x=%22200%22 y=%22150%22 text-anchor=%22middle%22 fill=%22%23f0e6d3%22 font-size=%2220%22>💃 Slide 5</text></svg>'">
+            <div class="slide-caption">"De la infancia a la juventud. Cada baile, cada sonrisa, cada momento compartido construye la persona en la que nos convertimos."</div>
+        </div>
+
+        <div class="slide" data-index="5">
+            <div class="slide-title">Graduación de Bachillerato</div>
+            <div class="decorative-line"></div>
+            <img class="slide-image" src="https://i.ibb.co/CXqYxKz/slide6.jpg" alt="Graduación Bachillerato"
+                 onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%232a2a3e%22 width=%22400%22 height=%22300%22/><text x=%22200%22 y=%22150%22 text-anchor=%22middle%22 fill=%22%23f0e6d3%22 font-size=%2220%22>🎓 Slide 6</text></svg>'">
+            <div class="slide-caption">"Junto a amigos que compartieron el camino. El diploma en la mano es testimonio de años de dedicación, amistad y crecimiento mutuo."</div>
+        </div>
+
+        <div class="slide" data-index="6">
+            <div class="slide-title">Ingeniero Informático</div>
+            <div class="decorative-line"></div>
+            <img class="slide-image" src="https://i.ibb.co/DXqYxKz/slide7.jpg" alt="Graduación Universidad"
+                 onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%232a2a3e%22 width=%22400%22 height=%22300%22/><text x=%22200%22 y=%22150%22 text-anchor=%22middle%22 fill=%22%23f0e6d3%22 font-size=%2220%22>🎓 UA Slide 7</text></svg>'">
+            <div class="slide-caption">"Universidad de Alicante — Grado en Ingeniería Informática. El sueño se hace realidad. Cada hora de estudio, cada desafío superado, tiene su recompensa."</div>
+        </div>
+
+        <div class="slide final" data-index="7">
+            <div class="slide-title">🎓 Fin de una Etapa</div>
+            <div class="decorative-line"></div>
+            <img class="slide-image" src="https://i.ibb.co/EXqYxKz/slide8.jpg" alt="Celebración"
+                 onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22><rect fill=%22%232a2a3e%22 width=%22400%22 height=%22300%22/><text x=%22200%22 y=%22150%22 text-anchor=%22middle%22 fill=%22%23f0e6d3%22 font-size=%2220%22>🚀 Slide 8</text></svg>'">
+            <div class="slide-caption">
+                "Hoy levanto el birrete no solo como símbolo de un título, sino como homenaje a cada persona que caminó a mi lado.<br><br>
+                <strong style='color:#c9a96e;'>Grado en Ingeniería Informática — Universidad de Alicante</strong><br><br>
+                Esta etapa termina, pero la aventura apenas comienza. 🚀"
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Reproductor de YouTube pequeño -->
+    <div class="music-player" id="musicPlayer" style="display: none;">
+        <span class="music-label">🎵 <strong>Closing Time</strong> - Semisonic</span>
+        <div class="yt-container" id="ytContainer"></div>
+        <button class="mute-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
+    </div>
+
+    <div class="nav-hint" id="navHint" style="display: none;">Desliza o toca los lados para navegar</div>
+
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 8;
+        const slides = document.querySelectorAll('.slide');
+        const progressBar = document.getElementById('progressBar');
+        const confettiContainer = document.getElementById('confettiContainer');
+        let autoAdvance = null;
+        const SLIDE_DURATION = 6000;
+        let isMuted = false;
+        let ytPlayer = null;
+
+        // Cargar YouTube API
+        const tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        document.head.appendChild(tag);
+
+        function onYouTubeIframeAPIReady() {
+            // El player se crea al comenzar
+        }
+
+        function createYouTubePlayer() {
+            ytPlayer = new YT.Player('ytContainer', {
+                height: '100%',
+                width: '100%',
+                videoId: 'A9Gea-VzK5E', // Closing Time - Semisonic
+                playerVars: {
+                    'autoplay': 1,
+                    'controls': 0,
+                    'disablekb': 1,
+                    'modestbranding': 1,
+                    'rel': 0,
+                    'loop': 1,
+                    'playlist': 'A9Gea-VzK5E'
+                },
+                events: {
+                    'onReady': (e) => {
+                        e.target.setVolume(60);
+                        e.target.playVideo();
+                    },
+                    'onStateChange': (e) => {
+                        if (e.data === YT.PlayerState.ENDED) {
+                            e.target.seekTo(0);
+                            e.target.playVideo();
+                        }
+                    }
+                }
+            });
+        }
+
+        function toggleMute() {
+            isMuted = !isMuted;
+            const btn = document.getElementById('muteBtn');
+            if (ytPlayer) {
+                if (isMuted) {
+                    ytPlayer.mute();
+                    btn.textContent = '🔇';
+                    btn.classList.add('muted');
+                } else {
+                    ytPlayer.unMute();
+                    btn.textContent = '🔊';
+                    btn.classList.remove('muted');
+                }
+            }
+        }
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                slide.classList.toggle('active', index === currentSlide);
+            });
+            progressBar.style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
+
+            if (currentSlide === totalSlides - 1) {
+                launchConfetti();
+            } else {
+                confettiContainer.innerHTML = '';
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                currentSlide++;
+                updateSlide();
+            } else {
+                clearInterval(autoAdvance);
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        function startPresentation() {
+            document.getElementById('introOverlay').classList.add('hidden');
+            document.getElementById('musicPlayer').style.display = 'flex';
+            document.getElementById('navHint').style.display = 'block';
+            
+            currentSlide = 0;
+            updateSlide();
+            
+            // Crear reproductor de YouTube
+            if (typeof YT !== 'undefined' && YT.Player) {
+                createYouTubePlayer();
+            } else {
+                // Esperar a que cargue la API
+                const checkYT = setInterval(() => {
+                    if (typeof YT !== 'undefined' && YT.Player) {
+                        createYouTubePlayer();
+                        clearInterval(checkYT);
+                    }
+                }, 500);
+            }
+
+            autoAdvance = setInterval(() => {
+                if (currentSlide < totalSlides - 1) {
+                    nextSlide();
+                } else {
+                    clearInterval(autoAdvance);
+                }
+            }, SLIDE_DURATION);
+        }
+
+        function launchConfetti() {
+            confettiContainer.innerHTML = '';
+            const colors = ['#c9a96e', '#f0e6d3', '#ffffff', '#e74c3c', '#3498db', '#2ecc71', '#f39c12'];
+            for (let i = 0; i < 60; i++) {
+                const confetti = document.createElement('div');
+                confetti.classList.add('confetti');
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.width = (Math.random() * 8 + 4) + 'px';
+                confetti.style.height = (Math.random() * 8 + 4) + 'px';
+                confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
+                confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                confetti.style.animationDelay = (Math.random() * 2) + 's';
+                confettiContainer.appendChild(confetti);
+            }
+        }
+
+        // Navegación táctil (swipe)
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            const diffX = touchStartX - touchEndX;
+            const diffY = touchStartY - touchEndY;
+
+            // Solo considerar swipe horizontal
+            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+                if (diffX > 0) nextSlide();
+                else prevSlide();
+            }
+        });
+
+        // Navegación con clicks en los lados (móvil)
+        document.addEventListener('click', (e) => {
+            // Ignorar clicks en botones
+            if (e.target.closest('.mute-btn') || e.target.closest('.start-btn') || e.target.closest('.yt-container')) return;
+            
+            const screenWidth = window.innerWidth;
+            const clickX = e.clientX;
+            
+            if (clickX > screenWidth * 0.7) {
+                nextSlide();
+            } else if (clickX < screenWidth * 0.3) {
+                prevSlide();
+            }
+        });
+
+        // Teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                prevSlide();
+            } else if (e.key === 'm' || e.key === 'M') {
+                toggleMute();
+            }
+        });
+    </script>
+
+</body>
+</html>
