@@ -35,7 +35,7 @@
             transition: opacity 1.2s ease-in-out;
             pointer-events: none;
             padding: 15px;
-            padding-bottom: 80px;
+            padding-bottom: 100px; /* Más espacio abajo para que no tape nada */
         }
 
         .slide.active {
@@ -205,62 +205,43 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
 
-        .music-player {
+        /* Botón de silencio discreto en la esquina superior derecha */
+        .mute-btn-floating {
             position: fixed;
-            bottom: 15px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 150;
-            background: rgba(0,0,0,0.7);
-            border-radius: 12px;
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .music-label {
-            color: #e0d5c1;
-            font-size: 0.85rem;
-            font-style: italic;
-        }
-
-        .music-label strong {
-            color: #c9a96e;
-        }
-
-        .mute-btn {
-            background: rgba(255,255,255,0.1);
+            top: 15px;
+            right: 15px;
+            background: rgba(0,0,0,0.4);
             border: 1px solid rgba(255,255,255,0.2);
             color: #e0d5c1;
-            width: 36px;
-            height: 36px;
+            width: 44px;
+            height: 44px;
             border-radius: 50%;
             cursor: pointer;
-            font-size: 1rem;
-            display: flex;
+            font-size: 1.2rem;
+            display: none; /* Se muestra al comenzar */
             align-items: center;
             justify-content: center;
+            z-index: 150;
             transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
         }
 
-        .mute-btn:hover {
-            background: rgba(255,255,255,0.25);
+        .mute-btn-floating:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
         }
 
-        .mute-btn.muted {
+        .mute-btn-floating.muted {
             opacity: 0.5;
         }
 
         .nav-hint {
             position: fixed;
-            bottom: 70px;
+            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            color: rgba(255,255,255,0.4);
-            font-size: 0.8rem;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.75rem;
             z-index: 100;
             text-align: center;
             pointer-events: none;
@@ -282,10 +263,13 @@
     <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
     <div class="confetti-container" id="confettiContainer"></div>
 
-    <!-- ELEMENTO DE AUDIO LOCAL (¡Asegúrate de tener closing_time.mp3 en la misma carpeta!) -->
+    <!-- Audio local (asegúrate de que closing_time.mp3 esté en la misma carpeta) -->
     <audio id="bgMusic" loop preload="auto">
         <source src="closing_time.mp3" type="audio/mpeg">
     </audio>
+
+    <!-- Botón de silencio discreto (esquina superior derecha) -->
+    <button class="mute-btn-floating" id="muteBtn" onclick="toggleMute()" title="Silenciar/Activar música">🔊</button>
 
     <div class="intro-overlay" id="introOverlay">
         <div class="intro-title">A Través del Tiempo</div>
@@ -367,11 +351,6 @@
 
     </div>
 
-    <div class="music-player" id="musicPlayer" style="display: none;">
-        <span class="music-label">🎵 <strong>Closing Time</strong> - Semisonic</span>
-        <button class="mute-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
-    </div>
-
     <div class="nav-hint" id="navHint" style="display: none;">Desliza o toca los lados para navegar</div>
 
     <script>
@@ -380,15 +359,13 @@
         const slides = document.querySelectorAll('.slide');
         const progressBar = document.getElementById('progressBar');
         const confettiContainer = document.getElementById('confettiContainer');
-        const bgMusic = document.getElementById('bgMusic'); // Referencia al audio
+        const bgMusic = document.getElementById('bgMusic');
         let autoAdvance = null;
         const SLIDE_DURATION = 6000;
         let isMuted = false;
 
-        // Función para iniciar la música (se llama al hacer clic en "Comenzar")
         function startMusic() {
-            bgMusic.volume = 0.5; // Volumen al 50%
-            // El play() debe ir dentro de un evento de clic del usuario para funcionar en móviles
+            bgMusic.volume = 0.5;
             bgMusic.play().then(() => {
                 console.log('Música reproduciéndose correctamente');
             }).catch(error => {
@@ -441,13 +418,11 @@
 
         function startPresentation() {
             document.getElementById('introOverlay').classList.add('hidden');
-            document.getElementById('musicPlayer').style.display = 'flex';
+            document.getElementById('muteBtn').style.display = 'flex'; // Mostrar botón de silencio
             document.getElementById('navHint').style.display = 'block';
             
             currentSlide = 0;
             updateSlide();
-            
-            // ¡Aquí se inicia la música! Al ser disparado por un clic, el móvil lo permite.
             startMusic();
 
             autoAdvance = setInterval(() => {
@@ -499,7 +474,7 @@
 
         // Navegación con clicks en los lados
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.mute-btn') || e.target.closest('.start-btn')) return;
+            if (e.target.closest('.mute-btn-floating') || e.target.closest('.start-btn')) return;
             
             const screenWidth = window.innerWidth;
             const clickX = e.clientX;
