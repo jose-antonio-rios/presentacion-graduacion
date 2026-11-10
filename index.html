@@ -35,7 +35,7 @@
             transition: opacity 1.2s ease-in-out;
             pointer-events: none;
             padding: 15px;
-            padding-bottom: 100px; /* Más espacio abajo para que no tape nada */
+            padding-bottom: 100px;
         }
 
         .slide.active {
@@ -53,7 +53,7 @@
 
         .slide-caption {
             margin-top: 15px;
-            font-size: 1rem;
+            font-size: 1.15rem; /* AUMENTADO (antes 1rem) */
             font-style: italic;
             color: #e0d5c1;
             text-align: center;
@@ -70,7 +70,7 @@
         }
 
         .slide-title {
-            font-size: 1.4rem;
+            font-size: 1.6rem; /* AUMENTADO (antes 1.4rem) */
             margin-bottom: 8px;
             color: #f0e6d3;
             letter-spacing: 2px;
@@ -87,13 +87,13 @@
         }
 
         .slide.final .slide-title {
-            font-size: 1.6rem;
+            font-size: 1.8rem; /* AUMENTADO (antes 1.6rem) */
             color: #c9a96e;
             text-shadow: 0 0 20px rgba(201,169,110,0.3);
         }
 
         .slide.final .slide-caption {
-            font-size: 1.05rem;
+            font-size: 1.2rem; /* AUMENTADO (antes 1.05rem) */
             color: #f0e6d3;
         }
 
@@ -126,7 +126,7 @@
         }
 
         .intro-title {
-            font-size: 2rem;
+            font-size: 2.4rem; /* AUMENTADO (antes 2rem) */
             color: #f0e6d3;
             letter-spacing: 4px;
             text-transform: uppercase;
@@ -134,7 +134,7 @@
         }
 
         .intro-subtitle {
-            font-size: 1rem;
+            font-size: 1.15rem; /* AUMENTADO (antes 1rem) */
             color: #c9a96e;
             font-style: italic;
             margin-bottom: 10px;
@@ -142,7 +142,7 @@
         }
 
         .intro-song {
-            font-size: 0.9rem;
+            font-size: 1.05rem; /* AUMENTADO (antes 0.9rem) */
             color: #8a8a9a;
             margin-bottom: 25px;
             font-style: italic;
@@ -155,7 +155,7 @@
             border: none;
             padding: 15px 35px;
             border-radius: 30px;
-            font-size: 1.1rem;
+            font-size: 1.25rem; /* AUMENTADO (antes 1.1rem) */
             font-family: 'Georgia', serif;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -205,7 +205,6 @@
             100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
         }
 
-        /* Botón de silencio discreto en la esquina superior derecha */
         .mute-btn-floating {
             position: fixed;
             top: 15px;
@@ -218,7 +217,7 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 1.2rem;
-            display: none; /* Se muestra al comenzar */
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 150;
@@ -240,20 +239,26 @@
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
-            color: rgba(255,255,255,0.3);
-            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+            font-size: 0.85rem; /* Ligeramente aumentado */
             z-index: 100;
             text-align: center;
             pointer-events: none;
         }
 
+        /* Responsive para móvil: también aumentado proporcionalmente */
         @media (max-width: 600px) {
-            .intro-title { font-size: 1.5rem; }
-            .intro-subtitle { font-size: 0.9rem; }
-            .slide-title { font-size: 1.2rem; }
-            .slide-caption { font-size: 0.9rem; }
-            .slide.final .slide-title { font-size: 1.3rem; }
-            .slide.final .slide-caption { font-size: 0.95rem; }
+            .intro-title { font-size: 1.8rem; } /* Antes 1.5rem */
+            .intro-subtitle { font-size: 1rem; } /* Antes 0.9rem */
+            .intro-song { font-size: 0.95rem; }
+            .start-btn { font-size: 1.1rem; }
+            
+            .slide-title { font-size: 1.35rem; } /* Antes 1.2rem */
+            .slide-caption { font-size: 1.05rem; } /* Antes 0.9rem */
+            
+            .slide.final .slide-title { font-size: 1.5rem; } /* Antes 1.3rem */
+            .slide.final .slide-caption { font-size: 1.1rem; } /* Antes 0.95rem */
+            
             .slide-image { max-height: 50vh; }
         }
     </style>
@@ -263,12 +268,10 @@
     <div class="progress-bar" id="progressBar" style="width: 0%;"></div>
     <div class="confetti-container" id="confettiContainer"></div>
 
-    <!-- Audio local (asegúrate de que closing_time.mp3 esté en la misma carpeta) -->
     <audio id="bgMusic" loop preload="auto">
         <source src="closing_time.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- Botón de silencio discreto (esquina superior derecha) -->
     <button class="mute-btn-floating" id="muteBtn" onclick="toggleMute()" title="Silenciar/Activar música">🔊</button>
 
     <div class="intro-overlay" id="introOverlay">
@@ -418,7 +421,7 @@
 
         function startPresentation() {
             document.getElementById('introOverlay').classList.add('hidden');
-            document.getElementById('muteBtn').style.display = 'flex'; // Mostrar botón de silencio
+            document.getElementById('muteBtn').style.display = 'flex';
             document.getElementById('navHint').style.display = 'block';
             
             currentSlide = 0;
@@ -451,7 +454,6 @@
             }
         }
 
-        // Navegación táctil (swipe)
         let touchStartX = 0;
         let touchStartY = 0;
 
@@ -472,7 +474,6 @@
             }
         });
 
-        // Navegación con clicks en los lados
         document.addEventListener('click', (e) => {
             if (e.target.closest('.mute-btn-floating') || e.target.closest('.start-btn')) return;
             
@@ -486,7 +487,6 @@
             }
         });
 
-        // Teclado
         document.addEventListener('keydown', (e) => {
             if (e.key === 'ArrowRight' || e.key === ' ') {
                 e.preventDefault();
